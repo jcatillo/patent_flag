@@ -9,8 +9,7 @@ This project provides an integrated pipeline to:
 1. **Extract scaffolds** from molecular SMILES strings
 2. **Search for similar** patented compounds (2D similarity)
 3. **Search for substructure** matches in patents
-4. **Visualize results** with patent analysis graphs
-5. **Interpret findings** for drug discovery and IP strategy
+4. **Interpret findings** for drug discovery and IP strategy
 
 ---
 
@@ -21,7 +20,6 @@ patent_flag/
 ├── scaffold.py                      # Extract Bemis-Murcko scaffolds
 ├── similar_flag.py                  # Find patented similar compounds
 ├── substructure_flag.py             # Find patented substructure matches
-├── generate_patent_graph.py         # Generate analysis visualizations
 │
 ├── exact/                           # Original SMILES files
 │   ├── all_single_exact.txt
@@ -47,9 +45,6 @@ patent_flag/
 │
 ├── substructure/                    # Substructure search results
 │   └── *.csv
-│
-├── similarity_analysis.png          # Visualization output
-├── substructure_analysis.png        # Visualization output
 │
 └── README.md, *.md                  # Documentation files
 ```
@@ -97,16 +92,6 @@ Find compounds containing your molecule as substructure:
 ```bash
 python substructure_flag.py -i exact/molecules.txt -o substructure/results.csv
 ```
-
-### 4. Generate Analysis Graphs
-
-Create visualization of patent status:
-
-```bash
-python generate_patent_graph.py
-```
-
-Outputs: `similarity_analysis.png`, `substructure_analysis.png`
 
 ---
 
@@ -176,24 +161,6 @@ python substructure_flag.py -i input.txt -o output.csv
 
 ---
 
-### generate_patent_graph.py
-
-**Purpose**: Analyze results and create visualization
-
-```bash
-python generate_patent_graph.py
-```
-
-**Generates**:
-
-- `similarity_analysis.png` - Similarity search patent breakdown
-- `substructure_analysis.png` - Substructure search patent breakdown
-- Console summary with statistics
-
-**See**: [GRAPH_INTERPRETATION.md](GRAPH_INTERPRETATION.md)
-
----
-
 ## Complete Workflow Example
 
 ### Step 1: Prepare Input
@@ -230,12 +197,6 @@ python substructure_flag.py -i scaffold/antifungal_smiles_scaffold.txt \
                             -o substructure/antifungal_scaffold.csv
 ```
 
-### Step 5: Generate Analysis
-
-```bash
-python generate_patent_graph.py
-```
-
 ---
 
 ## Output Format
@@ -246,13 +207,6 @@ All flag scripts output CSV files with:
 
 - **input_smile**: Input SMILES string
 - **is_patented**: Boolean (True = patent found, False = no patent)
-
-### Visualization
-
-Two PNG graphs:
-
-- **Left chart**: Absolute counts
-- **Right chart**: Percentage breakdown
 
 ---
 
@@ -332,13 +286,9 @@ Input SMILES (exact/)
     │   ├─→ Exact SMILES → similarity/*exact*_flag.csv
     │   └─→ Scaffold SMILES → similarity/*scaffold*_flag.csv
     │
-    ├─→ Substructure Search (substructure_flag.py)
-    │   ├─→ Exact SMILES → substructure/*exact*_flag.csv
-    │   └─→ Scaffold SMILES → substructure/*scaffold*_flag.csv
-    │
-    └─→ Analysis (generate_patent_graph.py)
-        ├─→ similarity_analysis.png
-        └─→ substructure_analysis.png
+    └─→ Substructure Search (substructure_flag.py)
+        ├─→ Exact SMILES → substructure/*exact*_flag.csv
+        └─→ Scaffold SMILES → substructure/*scaffold*_flag.csv
 ```
 
 ---
