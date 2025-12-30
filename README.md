@@ -63,7 +63,7 @@ python scaffold.py -i data/training_dataset/training_dataset.txt -o scaffold/tra
 python similar_flag.py -i data/generated_set/tanimoto_ro5_compliant_molecules.txt -o similarity/generated_set/tanimoto_ro5_compliant_molecules_exact_flag.csv -t 95
 python similar_flag.py -i data/generated_set/all_generated_mol.txt -o similarity/generated_set/all_generated_mol_exact_flag.csv -t 95
 python similar_flag.py -i data/generated_set/top10_molecules.txt -o similarity/generated_set/top_10_molecules_exact_flag.csv -t 95
-python similar_flag.py -i data/training_dataset/training_dataset.txt -o similarity/trainng_dataset/training_dataset_exact_flag.csv -t 95
+python similar_flag.py -i data/training_dataset/training_dataset.txt -o similarity/training_dataset/training_dataset_exact_flag.csv -t 95
 ```
 
 ### Similarity Search - SCAFFOLD
@@ -72,7 +72,7 @@ python similar_flag.py -i data/training_dataset/training_dataset.txt -o similari
 python similar_flag.py -i scaffold/generated_set/tanimoto_ro5_compliant_molecules_scaffold.txt -o similarity/generated_set/tanimoto_ro5_compliant_molecules_scaffold_flag.csv -t 95
 python similar_flag.py -i scaffold/generated_set/all_generated_mol_scaffold.txt -o similarity/generated_set/all_generated_mol_scaffold_flag.csv -t 95
 python similar_flag.py -i scaffold/generated_set/top10_molecules_scaffold.txt -o similarity/generated_set/top10_molecules_scaffold_flag.csv -t 95
-python similar_flag.py -i scaffold/training_dataset/training_dataset_scaffold.txt -o similarity/trainng_dataset/trainig_dataset_scaffold_flag.csv -t 95
+python similar_flag.py -i scaffold/training_dataset/training_dataset_scaffold.txt -o similarity/training_dataset/training_dataset_scaffold_flag.csv -t 95
 ```
 
 ### Substructure Search - EXACT
@@ -144,9 +144,9 @@ patent_flag/
 │   │   ├── all_generated_mol_scaffold_flag.csv
 │   │   ├── top_10_molecules_exact_flag.csv
 │   │   └── top10_molecules_scaffold_flag.csv
-│   └── trainng_dataset/
+│   └── training_dataset/
 │       ├── training_dataset_exact_flag.csv
-│       └── trainig_dataset_scaffold_flag.csv
+│       └── training_dataset_scaffold_flag.csv
 │
 └── substructure/                        # Substructure search results
     ├── generated_set/
@@ -163,7 +163,38 @@ patent_flag/
 
 ---
 
-## Key Arguments
+## Visualization Scripts
+
+Generate comparison charts for analysis results:
+
+### Scaffold Comparison
+
+```bash
+python visualizations/scaffold_comparison.py
+python visualizations/scaffold_comparison.py -d data -s scaffold -o output.png
+```
+
+Compares non-empty entries in original data vs scaffold outputs.
+
+### Similarity Search Comparison
+
+```bash
+python visualizations/similarity_comparison.py
+python visualizations/similarity_comparison.py -s similarity -o output.png
+```
+
+Visualizes patent hit rates for exact vs scaffold similarity searches (Tanimoto threshold: 95%).
+
+### Substructure Search Comparison
+
+```bash
+python visualizations/substructure_comparison.py
+python visualizations/substructure_comparison.py -s substructure -o output.png
+```
+
+Visualizes patent hit rates for exact vs scaffold substructure searches.
+
+---
 
 **scaffold.py**
 
