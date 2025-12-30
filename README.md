@@ -136,9 +136,29 @@ patent_flag/
 │   └── training_dataset/
 │       └── training_dataset_scaffold.txt
 │
-└── similarity/                          # Results CSVs
+├── similarity/                          # Similarity search results
+│   ├── generated_set/
+│   │   ├── tanimoto_ro5_compliant_molecules_exact_flag.csv
+│   │   ├── tanimoto_ro5_compliant_molecules_scaffold_flag.csv
+│   │   ├── all_generated_mol_exact_flag.csv
+│   │   ├── all_generated_mol_scaffold_flag.csv
+│   │   ├── top_10_molecules_exact_flag.csv
+│   │   └── top10_molecules_scaffold_flag.csv
+│   └── trainng_dataset/
+│       ├── training_dataset_exact_flag.csv
+│       └── trainig_dataset_scaffold_flag.csv
+│
+└── substructure/                        # Substructure search results
     ├── generated_set/
-    └── trainng_dataset/
+    │   ├── tanimoto_ro5_compliant_molecules_exact_exact_flag.csv
+    │   ├── tanimoto_ro5_compliant_molecules_scaffold_flag.csv
+    │   ├── all_generated_mol_exact_flag.csv
+    │   ├── all_generated_mol_scaffold_flag.csv
+    │   ├── top_10_molecules_exact_flag.csv
+    │   └── top_10_molecules_scaffold_flag.csv
+    └── training_dataset/
+        ├── training_dataset_exact_flag.csv
+        └── training_dataset_scaffold_flag.csv
 ```
 
 ---
