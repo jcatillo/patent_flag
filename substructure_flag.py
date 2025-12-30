@@ -26,13 +26,6 @@ def check_patent_in_toc(session: requests.Session, cid: int) -> bool:
         return any("patent" in h.lower() for h in headings)
     except: return False
 
-def get_canonical_smiles(session: requests.Session, cid: int) -> Optional[str]:
-    url = f"{PUBCHEM_REST}/compound/cid/{cid}/property/CanonicalSMILES/JSON"
-    try:
-        r = session.get(url, timeout=10)
-        return r.json()['PropertyTable']['Properties'][0]['ConnectivitySMILES']
-    except: return None
-
 def get_substructure_cids(session: requests.Session, smiles: str) -> List[int]:
     """Handles async substructure search using ListKey polling."""
     init_url = f"{PUBCHEM_REST}/compound/substructure/smiles/{smiles}/JSON"
@@ -95,14 +88,14 @@ def process_molecules(input_path: str, output_path: str):
     for i, line in enumerate(raw_lines, 1):
         clean_line = line.strip()
         if not clean_line or clean_line.startswith(('#', '//')):
-            results.append({"input_smile": "", "is_patented": False, "patent_cid": None, "similar_smile_patent": ""})
+            results.append({"input_smile": "", "is_patented": False})
             continue
 
         input_smi = clean_line.split()[0]
         print(f"\nRow {i}: Substructure search for {input_smi}")
         
         cids = get_substructure_cids(session, input_smi)
-        is_patented, patented_smi, found_cid = False, "", None
+        is_patented = False
 
         if not cids:
             print(f"  No substructure matches found")
@@ -113,17 +106,13 @@ def process_molecules(input_path: str, output_path: str):
             for cid in cids[:50]:
                 if check_patent_in_toc(session, cid):
                     print(f"  Found patented substructure CID: {cid}")
-                    found_cid = cid
                     is_patented = True
-                    patented_smi = get_canonical_smiles(session, cid)
                     break
                 time.sleep(0.2) 
 
         results.append({
             "input_smile": input_smi,
-            "is_patented": is_patented,
-            "patent_cid": found_cid,
-            "similar_smile_patent": patented_smi
+            "is_patented": is_patented
         })
 
     pd.DataFrame(results).to_csv(output_path, index=False)
