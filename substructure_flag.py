@@ -2,7 +2,6 @@ import argparse
 import time
 from pathlib import Path
 from typing import List, Optional, Dict, Any
-
 import pandas as pd
 import requests
 
@@ -31,41 +30,57 @@ def get_canonical_smiles(session: requests.Session, cid: int) -> Optional[str]:
     url = f"{PUBCHEM_REST}/compound/cid/{cid}/property/CanonicalSMILES/JSON"
     try:
         r = session.get(url, timeout=10)
-        # Fixed: Key is 'CanonicalSMILES', not 'ConnectivitySMILES'
-        return r.json()['PropertyTable']['Properties'][0]['ConnectivitySMILES']
+        # Fixed: Corrected dictionary key path
+        return r.json()['PropertyTable']['Properties'][0]['CanonicalSMILES']
     except: return None
 
-def process_molecules(input_path: str, output_path: str, threshold: int):
+def get_substructure_cids(session: requests.Session, smiles: str) -> List[int]:
+    """Handles async substructure search using ListKey polling."""
+    init_url = f"{PUBCHEM_REST}/compound/substructure/smiles/{smiles}/JSON"
+    try:
+        req = session.get(init_url, timeout=15)
+        if req.status_code != 202 and 'Waiting' not in req.json():
+            return []
+        
+        list_key = req.json()['Waiting']['ListKey']
+
+        print(f"  Substructure search initiated, ListKey: {list_key}")
+        list_url = f"{PUBCHEM_REST}/compound/listkey/{list_key}/cids/JSON"
+        
+        # Poll until results are ready
+        for _ in range(10): # Max 10 attempts
+            time.sleep(2)
+            r = session.get(list_url)
+            data = r.json()
+            if 'IdentifierList' in data:
+                return data['IdentifierList'].get('CID', [])
+            if 'Fault' in data: break
+    except: pass
+    return []
+
+def process_molecules(input_path: str, output_path: str):
     p = Path(input_path)
     if not p.exists(): return
 
-    # Removed the filter to preserve row count consistency
     raw_lines = p.read_text().splitlines()
     session, results = requests.Session(), []
 
     for i, line in enumerate(raw_lines, 1):
         clean_line = line.strip()
-        
-        # Handle empty lines or comments by appending an empty result row
         if not clean_line or clean_line.startswith(('#', '//')):
             results.append({"input_smile": "", "is_patented": False, "patent_cid": None, "similar_smile_patent": ""})
             continue
 
         input_smi = clean_line.split()[0]
-        print(f"Row {i}: Processing {input_smi}")
+        print(f"Row {i}: Substructure search for {input_smi}")
         
-        search_url = f"{PUBCHEM_REST}/compound/fastsimilarity_2d/smiles/cids/JSON"
-        try:
-            r = session.post(search_url, data={'smiles': input_smi, 'Threshold': threshold, 'MaxRecords': 50}, timeout=15)
-            cids = r.json().get('IdentifierList', {}).get('CID', [])
-        except: cids = []
-
+        cids = get_substructure_cids(session, input_smi)
         is_patented, patented_smi, found_cid = False, "", None
 
-        for cid in cids:
+        # Check top 10 results for patent info to save time
+        for cid in cids[:10]:
             if check_patent_in_toc(session, cid):
-                print(f"  Found patented compound CID: {cid}")
-                
+                print(f"  Found patented substructure CID: {cid}")
                 found_cid = cid
                 is_patented = True
                 patented_smi = get_canonical_smiles(session, cid)
@@ -85,7 +100,6 @@ def process_molecules(input_path: str, output_path: str, threshold: int):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--input", required=True)
-    parser.add_argument("-o", "--output", default="patent_results.csv")
-    parser.add_argument("-t", "--threshold", type=int, default=95)
+    parser.add_argument("-o", "--output", default="substructure_results.csv")
     args = parser.parse_args()
-    process_molecules(args.input, args.output, args.threshold)
+    process_molecules(args.input, args.output)
