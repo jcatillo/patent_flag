@@ -69,10 +69,10 @@ python similar_flag.py -i exact/all_single_exact.txt -o similarity/all_single_ex
 ### Similarity Search - SCAFFOLD
 
 ```bash
-python similar_flag.py -i scaffold/antifungal_smiles_scaffold.txt -o similarity/antifungal_smiles_scaffold_flag.csv -t 90
-python similar_flag.py -i scaffold/canonical_gen_mol_scaffold.txt -o similarity/canonical_gen_mol_scaffold_flag.csv -t 90
-python similar_flag.py -i scaffold/screening_top10_broad_spectrum_scaffold.txt -o similarity/screening_top10_broad_spectrum_scaffold_flag.csv -t 90
-python similar_flag.py -i scaffold/all_single_scaffold.txt -o similarity/all_single_scaffold_flag.csv -t 90
+python similar_flag.py -i scaffold/antifungal_smiles_scaffold.txt -o similarity/antifungal_smiles_scaffold_flag.csv -t 95
+python similar_flag.py -i scaffold/canonical_gen_mol_scaffold.txt -o similarity/canonical_gen_mol_scaffold_flag.csv -t 95
+python similar_flag.py -i scaffold/screening_top10_broad_spectrum_scaffold.txt -o similarity/screening_top10_broad_spectrum_scaffold_flag.csv -t 95
+python similar_flag.py -i scaffold/all_single_scaffold.txt -o similarity/all_single_scaffold_flag.csv -t 95
 ```
 
 ### Substructure Search - EXACT
