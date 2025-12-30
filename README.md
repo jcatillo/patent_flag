@@ -145,16 +145,6 @@ CC(C)Cc1ccc(cc1)C(C)C(O)=O
 
 ---
 
-## Performance
-
-- 10 compounds: 5-10 min
-- 100 compounds: 30-60 min
-- 1000+ compounds: 4-6 hours
-
-Depends on: compound count, threshold, API speed, network
-
----
-
 ## Notes
 
 - Respects PubChem API rate limits (0.2s delays)
