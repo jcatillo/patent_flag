@@ -27,14 +27,6 @@ def check_patent_in_toc(session: requests.Session, cid: int) -> bool:
         return any("patent" in h.lower() for h in headings)
     except: return False
 
-def get_canonical_smiles(session: requests.Session, cid: int) -> Optional[str]:
-    url = f"{PUBCHEM_REST}/compound/cid/{cid}/property/CanonicalSMILES/JSON"
-    try:
-        r = session.get(url, timeout=10)
-        # Fixed: Key is 'CanonicalSMILES', not 'ConnectivitySMILES'
-        return r.json()['PropertyTable']['Properties'][0]['ConnectivitySMILES']
-    except: return None
-
 def process_molecules(input_path: str, output_path: str, threshold: int):
     p = Path(input_path)
     if not p.exists(): return
@@ -48,7 +40,7 @@ def process_molecules(input_path: str, output_path: str, threshold: int):
         
         # Handle empty lines or comments by appending an empty result row
         if not clean_line or clean_line.startswith(('#', '//')):
-            results.append({"input_smile": "", "is_patented": False, "patent_cid": None, "similar_smile_patent": ""})
+            results.append({"input_smile": "", "is_patented": False})
             continue
 
         input_smi = clean_line.split()[0]
@@ -60,23 +52,18 @@ def process_molecules(input_path: str, output_path: str, threshold: int):
             cids = r.json().get('IdentifierList', {}).get('CID', [])
         except: cids = []
 
-        is_patented, patented_smi, found_cid = False, "", None
+        is_patented = False
 
         for cid in cids:
             if check_patent_in_toc(session, cid):
                 print(f"  Found patented compound CID: {cid}")
-                
-                found_cid = cid
                 is_patented = True
-                patented_smi = get_canonical_smiles(session, cid)
                 break
             time.sleep(0.2) 
 
         results.append({
             "input_smile": input_smi,
-            "is_patented": is_patented,
-            "patent_cid": found_cid,
-            "similar_smile_patent": patented_smi
+            "is_patented": is_patented
         })
 
     pd.DataFrame(results).to_csv(output_path, index=False)
