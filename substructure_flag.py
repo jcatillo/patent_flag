@@ -30,7 +30,7 @@ def get_canonical_smiles(session: requests.Session, cid: int) -> Optional[str]:
     url = f"{PUBCHEM_REST}/compound/cid/{cid}/property/CanonicalSMILES/JSON"
     try:
         r = session.get(url, timeout=10)
-        return r.json()['PropertyTable']['Properties'][0]['CanonicalSMILES']
+        return r.json()['PropertyTable']['Properties'][0]['ConnectivitySMILES']
     except: return None
 
 def get_substructure_cids(session: requests.Session, smiles: str) -> List[int]:
