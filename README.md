@@ -48,22 +48,49 @@ pip install pandas requests rdkit matplotlib
 
 ## Usage Examples
 
-### Scaffold Extraction
+### Scaffold Extraction (for Exact input)
 
 ```bash
-python scaffold.py -i exact/antifungal.txt -o scaffold/antifungal.txt
+python scaffold.py -i exact/antifungal_smiles.txt -o scaffold/antifungal_smiles_scaffold.txt
+python scaffold.py -i exact/canonical_gen_mol.txt -o scaffold/canonical_gen_mol_scaffold.txt
+python scaffold.py -i exact/screening_top10_broad_spectrum.txt -o scaffold/screening_top10_broad_spectrum_scaffold.txt
+python scaffold.py -i exact/all_single_exact.txt -o scaffold/all_single_scaffold.txt
 ```
 
-### Similarity Search
+### Similarity Search - EXACT
 
 ```bash
-# High threshold (strict matching)
-python similar_flag.py -i exact/molecules.txt -o similarity/exact.csv -t 95
+python similar_flag.py -i exact/antifungal_smiles.txt -o similarity/antifungal_smiles_flag.csv -t 95
+python similar_flag.py -i exact/canonical_gen_mol.txt -o similarity/canonical_gen_mol_flag.csv -t 95
+python similar_flag.py -i exact/screening_top10_broad_spectrum.txt -o similarity/screening_top10_broad_spectrum_flag.csv -t 95
+python similar_flag.py -i exact/all_single_exact.txt -o similarity/all_single_exact_flag.csv -t 95
+```
 
-### Substructure Search
+### Similarity Search - SCAFFOLD
 
 ```bash
-python substructure_flag.py -i exact/molecules.txt -o substructure/results.csv
+python similar_flag.py -i scaffold/antifungal_smiles_scaffold.txt -o similarity/antifungal_smiles_scaffold_flag.csv -t 90
+python similar_flag.py -i scaffold/canonical_gen_mol_scaffold.txt -o similarity/canonical_gen_mol_scaffold_flag.csv -t 90
+python similar_flag.py -i scaffold/screening_top10_broad_spectrum_scaffold.txt -o similarity/screening_top10_broad_spectrum_scaffold_flag.csv -t 90
+python similar_flag.py -i scaffold/all_single_scaffold.txt -o similarity/all_single_scaffold_flag.csv -t 90
+```
+
+### Substructure Search - EXACT
+
+```bash
+python substructure_flag.py -i exact/antifungal_smiles.txt -o substructure/antifungal_smiles_flag.csv
+python substructure_flag.py -i exact/canonical_gen_mol.txt -o substructure/canonical_gen_mol_flag.csv
+python substructure_flag.py -i exact/screening_top10_broad_spectrum.txt -o substructure/screening_top10_broad_spectrum_flag.csv
+python substructure_flag.py -i exact/all_single_exact.txt -o substructure/all_single_exact_flag.csv
+```
+
+### Substructure Search - SCAFFOLD
+
+```bash
+python substructure_flag.py -i scaffold/antifungal_smiles_scaffold.txt -o substructure/antifungal_smiles_scaffold_flag.csv
+python substructure_flag.py -i scaffold/canonical_gen_mol_scaffold.txt -o substructure/canonical_gen_mol_scaffold_flag.csv
+python substructure_flag.py -i scaffold/screening_top10_broad_spectrum_scaffold.txt -o substructure/screening_top10_broad_spectrum_scaffold_flag.csv
+python substructure_flag.py -i scaffold/all_single_scaffold.txt -o substructure/all_single_scaffold_flag.csv
 ```
 
 ---
