@@ -30,7 +30,6 @@ def get_canonical_smiles(session: requests.Session, cid: int) -> Optional[str]:
     url = f"{PUBCHEM_REST}/compound/cid/{cid}/property/CanonicalSMILES/JSON"
     try:
         r = session.get(url, timeout=10)
-        # Fixed: Corrected dictionary key path
         return r.json()['PropertyTable']['Properties'][0]['CanonicalSMILES']
     except: return None
 
@@ -38,29 +37,57 @@ def get_substructure_cids(session: requests.Session, smiles: str) -> List[int]:
     """Handles async substructure search using ListKey polling."""
     init_url = f"{PUBCHEM_REST}/compound/substructure/smiles/{smiles}/JSON"
     try:
-        req = session.get(init_url, timeout=15)
-        if req.status_code != 202 and 'Waiting' not in req.json():
-            return []
+        req = session.get(init_url, timeout=20)
         
-        list_key = req.json()['Waiting']['ListKey']
-
-        print(f"  Substructure search initiated, ListKey: {list_key}")
-        list_url = f"{PUBCHEM_REST}/compound/listkey/{list_key}/cids/JSON"
-        
-        # Poll until results are ready
-        for _ in range(10): # Max 10 attempts
-            time.sleep(2)
-            r = session.get(list_url)
-            data = r.json()
+        # Check if we got a direct response (immediate results)
+        if req.status_code == 200:
+            data = req.json()
             if 'IdentifierList' in data:
                 return data['IdentifierList'].get('CID', [])
-            if 'Fault' in data: break
-    except: pass
+        
+        # Handle async response (status 202 or Waiting key present)
+        if req.status_code == 202 or 'Waiting' in req.json():
+            data = req.json()
+            if 'Waiting' not in data:
+                return []
+            
+            list_key = data['Waiting']['ListKey']
+            print(f"  Substructure search initiated, ListKey: {list_key}")
+            list_url = f"{PUBCHEM_REST}/compound/listkey/{list_key}/cids/JSON"
+            
+            # Poll until results are ready
+            for attempt in range(15):  # Increased to 15 attempts
+                time.sleep(2)
+                r = session.get(list_url, timeout=10)
+                result_data = r.json()
+                
+                if 'IdentifierList' in result_data:
+                    cids = result_data['IdentifierList'].get('CID', [])
+                    print(f"  Retrieved {len(cids)} CIDs after {attempt + 1} polling attempts")
+                    return cids
+                
+                if 'Fault' in result_data:
+                    print(f"  Error in polling: {result_data.get('Fault')}")
+                    break
+                
+                # Still waiting, continue polling
+                if 'Waiting' in result_data:
+                    continue
+            
+            print(f"  Polling timed out after 15 attempts")
+            
+    except requests.exceptions.RequestException as e:
+        print(f"  Network error: {e}")
+    except Exception as e:
+        print(f"  Unexpected error: {e}")
+    
     return []
 
 def process_molecules(input_path: str, output_path: str):
     p = Path(input_path)
-    if not p.exists(): return
+    if not p.exists(): 
+        print(f"Error: Input file {input_path} not found")
+        return
 
     raw_lines = p.read_text().splitlines()
     session, results = requests.Session(), []
@@ -72,20 +99,25 @@ def process_molecules(input_path: str, output_path: str):
             continue
 
         input_smi = clean_line.split()[0]
-        print(f"Row {i}: Substructure search for {input_smi}")
+        print(f"\nRow {i}: Substructure search for {input_smi}")
         
         cids = get_substructure_cids(session, input_smi)
         is_patented, patented_smi, found_cid = False, "", None
 
-        # Check top 10 results for patent info to save time
-        for cid in cids[:10]:
-            if check_patent_in_toc(session, cid):
-                print(f"  Found patented substructure CID: {cid}")
-                found_cid = cid
-                is_patented = True
-                patented_smi = get_canonical_smiles(session, cid)
-                break
-            time.sleep(0.2) 
+        if not cids:
+            print(f"  No substructure matches found")
+        else:
+            print(f"  Checking {min(len(cids), 50)} compounds for patent information...")
+            
+            # Check top 50 results for patent info to save time
+            for cid in cids[:50]:
+                if check_patent_in_toc(session, cid):
+                    print(f"  Found patented substructure CID: {cid}")
+                    found_cid = cid
+                    is_patented = True
+                    patented_smi = get_canonical_smiles(session, cid)
+                    break
+                time.sleep(0.2) 
 
         results.append({
             "input_smile": input_smi,
@@ -95,7 +127,7 @@ def process_molecules(input_path: str, output_path: str):
         })
 
     pd.DataFrame(results).to_csv(output_path, index=False)
-    print(f"Results saved to {output_path}")
+    print(f"\nResults saved to {output_path}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
