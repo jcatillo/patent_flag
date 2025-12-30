@@ -60,10 +60,6 @@ python scaffold.py -i exact/antifungal.txt -o scaffold/antifungal.txt
 # High threshold (strict matching)
 python similar_flag.py -i exact/molecules.txt -o similarity/exact.csv -t 95
 
-# Lower threshold (broader search)
-python similar_flag.py -i exact/molecules.txt -o similarity/broad.csv -t 85
-```
-
 ### Substructure Search
 
 ```bash
