@@ -95,7 +95,7 @@ def process_molecules(input_path: str, output_path: str, threshold: int):
         # 1. Similarity Search (Threshold-based)
         search_url = f"{PUBCHEM_PUG_REST}/compound/fastsimilarity_2d/smiles/cids/JSON"
         try:
-            r = session.post(search_url, data={'smiles': input_smi, 'Threshold': threshold}, timeout=15)
+            r = session.post(search_url, data={'smiles': input_smi, 'Threshold': threshold, 'MaxRecords': 50}, timeout=15)
             cids = r.json().get('IdentifierList', {}).get('CID', [])
         except:
             cids = []
